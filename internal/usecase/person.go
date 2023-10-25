@@ -21,6 +21,15 @@ func New(r PersonRepo, w EnrichWebAPI) *PersonUseCase {
 	}
 }
 
+func (uc *PersonUseCase) Find(ctx context.Context, id entity.Id) ([]entity.Person, error) {
+	res, err := uc.repo.Find(ctx, id)
+	if err != nil {
+		return res, fmt.Errorf("%s: repo.Find returned error: %w", op, err)
+	}
+
+	return res, nil
+}
+
 func (uc *PersonUseCase) Save(ctx context.Context, person entity.Person) ([]entity.Person, error) {
 
 	res, err := uc.repo.Save(ctx, person)
@@ -31,7 +40,7 @@ func (uc *PersonUseCase) Save(ctx context.Context, person entity.Person) ([]enti
 	return res, nil
 }
 
-func (uc *PersonUseCase) Update(ctx context.Context, updates entity.UpdateRequest) ([]entity.Person, error) {
+func (uc *PersonUseCase) Update(ctx context.Context, updates entity.Person) ([]entity.Person, error) {
 	res, err := uc.repo.Update(ctx, updates)
 	if err != nil {
 		return res, fmt.Errorf("%s: repo.Update returned error: %w", op, err)
@@ -40,8 +49,8 @@ func (uc *PersonUseCase) Update(ctx context.Context, updates entity.UpdateReques
 	return res, nil
 }
 
-func (uc *PersonUseCase) Delete(ctx context.Context, deleter entity.DelRequest) ([]entity.Person, error) {
-	res, err := uc.repo.Delete(ctx, deleter)
+func (uc *PersonUseCase) Delete(ctx context.Context, id entity.Id) ([]entity.Person, error) {
+	res, err := uc.repo.Delete(ctx, id)
 	if err != nil {
 		return res, fmt.Errorf("%s: repo.Delete returned error: %w", op, err)
 	}
@@ -49,8 +58,8 @@ func (uc *PersonUseCase) Delete(ctx context.Context, deleter entity.DelRequest) 
 	return res, nil
 }
 
-func (uc *PersonUseCase) Find(ctx context.Context, getter entity.Options) ([]entity.Person, error) {
-	res, err := uc.repo.Find(ctx, getter)
+func (uc *PersonUseCase) List(ctx context.Context) ([]entity.Person, error) {
+	res, err := uc.repo.List(ctx)
 	if err != nil {
 		return res, fmt.Errorf("%s: repo.Find returned error: %w", op, err)
 	}
@@ -58,8 +67,8 @@ func (uc *PersonUseCase) Find(ctx context.Context, getter entity.Options) ([]ent
 	return res, nil
 }
 
-func (uc *PersonUseCase) ListPeople(ctx context.Context, getter entity.Options, personID int) ([]entity.Person, error) {
-	res, err := uc.repo.ListPeople(ctx, getter, personID)
+func (uc *PersonUseCase) Next(ctx context.Context) ([]entity.Person, error) {
+	res, err := uc.repo.Next(ctx)
 	if err != nil {
 		return res, fmt.Errorf("%s: repo.Find returned error: %w", op, err)
 	}

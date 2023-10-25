@@ -7,17 +7,13 @@ import (
 )
 
 const (
-	ASC                       = "ASC"
-	DESC                      = "DESC"
-	SortOptionsContextKey Str = "sort_options"
+	ASC                     = "ASC"
+	DESC                    = "DESC"
+	SortByContextKey    Str = "sort_by"
+	SortOrderContextKey Str = "sort_order"
 )
 
 type Str string
-
-type Options struct {
-	OrderBy []string
-	Order   []string
-}
 
 // The following Middleware injects sorting options into request context.
 // In case options can't be found, we stop here and return error response.
@@ -68,18 +64,13 @@ func Middleware(next http.Handler) http.Handler {
 
 					next.ServeHTTP(w, r)
 				}
-
 			}
-
 		}
 
-		options := Options{
-			OrderBy: sortBy,
-			Order:   sortOrder,
-		}
+		// Наполним контекст запроса новыми парами ключ/значение
+		ctx := context.WithValue(r.Context(), SortByContextKey, sortBy)
+		ctx = context.WithValue(ctx, SortOrderContextKey, sortOrder)
 
-		// Наполним контекст запроса новой парой ключ/значение
-		ctx := context.WithValue(r.Context(), SortOptionsContextKey, options)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

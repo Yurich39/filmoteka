@@ -10,10 +10,11 @@ import (
 type (
 	Person interface {
 		Save(ctx context.Context, person entity.Person) ([]entity.Person, error)
-		Update(ctx context.Context, updates entity.UpdateRequest) ([]entity.Person, error)
-		Delete(ctx context.Context, deleter entity.DelRequest) ([]entity.Person, error)
-		Find(ctx context.Context, getter entity.Options) ([]entity.Person, error)
-		ListPeople(ctx context.Context, getter entity.Options, personID int) ([]entity.Person, error)
+		Update(ctx context.Context, updates entity.Person) ([]entity.Person, error)
+		Delete(ctx context.Context, id entity.Id) ([]entity.Person, error)
+		Find(ctx context.Context, id entity.Id) ([]entity.Person, error)
+		List(ctx context.Context) ([]entity.Person, error)
+		Next(ctx context.Context) ([]entity.Person, error)
 
 		GetAge(name string) (int, error)
 		GetGender(name string) (string, error)
@@ -22,10 +23,11 @@ type (
 
 	PersonRepo interface {
 		Save(ctx context.Context, person entity.Person) ([]entity.Person, error)
-		Update(ctx context.Context, updates entity.UpdateRequest) ([]entity.Person, error)
-		Delete(ctx context.Context, deleter entity.DelRequest) ([]entity.Person, error)
-		Find(ctx context.Context, getter entity.Options) ([]entity.Person, error)
-		ListPeople(ctx context.Context, getter entity.Options, personID int) ([]entity.Person, error)
+		Update(ctx context.Context, updates entity.Person) ([]entity.Person, error)
+		Delete(ctx context.Context, id entity.Id) ([]entity.Person, error)
+		Find(ctx context.Context, id entity.Id) ([]entity.Person, error)
+		List(ctx context.Context) ([]entity.Person, error)
+		Next(ctx context.Context) ([]entity.Person, error)
 	}
 
 	EnrichWebAPI interface {
