@@ -4,14 +4,13 @@ import (
 	"net/http"
 	"strconv"
 
-	"people-finder/internal/usecase"
-	"people-finder/pkg/logger"
-
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 	"golang.org/x/exp/slog"
 
 	"people-finder/internal/entity"
+	"people-finder/internal/usecase"
+	"people-finder/pkg/logger"
 )
 
 type handler struct {
@@ -26,18 +25,28 @@ func newHandler(t usecase.Person, l logger.Interface) *handler {
 func (h *handler) find(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	var id entity.Id
-	val, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+
+	if id == 0 {
+
+		h.l.Info("No data available for id = 0")
+
+		render.JSON(w, r,
+			Response{
+				Status: "Wrong id. Id should be > 0",
+			})
+
+		return
+	}
 
 	if err != nil {
+
 		h.l.Debug("id parameter in URL is not integer or empty", h.l.Err(err))
 
 		render.JSON(w, r, Error("Unable to retrieve id from URL"))
 
 		return
 	}
-
-	id.Id = val
 
 	res, err := h.t.Find(ctx, id)
 
@@ -52,45 +61,26 @@ func (h *handler) find(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r,
 		Response{
 			Status: StatusOk,
-			People: res,
+			Person: &res,
 		})
-}
-
-type EnrichData struct {
-	Age         int
-	Gender      string
-	Nationality string
 }
 
 func (h *handler) save(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	// Decode JSON
-	var person entity.Person
-	err := render.DecodeJSON(r.Body, &person)
+	var data entity.Data
+	err := render.DecodeJSON(r.Body, &data)
 	if err != nil {
-		h.l.Debug("Failed to decode request body to entity.Person", h.l.Err(err))
+		h.l.Debug("Failed to decode request body to entity.Data", h.l.Err(err))
 
-		render.JSON(w, r, Error("failed to decode request body to entity.Person"))
+		render.JSON(w, r, Error("failed to decode request body to entity.Data"))
 
 		return
 	}
 
-	h.l.Info("request body decoded to entity.Person successfully", slog.Any("request", person))
+	h.l.Info("request body decoded to entity.Data successfully", slog.Any("request", data))
 
-	// Validate data
-
-	// Enrich data
-	data := Enrich(h, *person.Data.Name)
-
-	h.l.Info("API enriched data received successfully:", slog.Any("request", data))
-
-	person.Data.Age = &data.Age
-	person.Data.Gender = &data.Gender
-	person.Data.Nationality = &data.Nationality
-
-	// Save data in db
-	res, err := h.t.Save(ctx, person)
+	res, err := h.t.Save(ctx, data)
 
 	if err != nil {
 		h.l.Debug("Failed to save data in DB", h.l.Err(err))
@@ -103,47 +93,13 @@ func (h *handler) save(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r,
 		Response{
 			Status: StatusOk,
-			People: res,
+			Person: &res,
 		})
-}
-
-func Enrich(h *handler, name string) EnrichData {
-	data := EnrichData{}
-
-	// Request Age
-	age, err := h.t.GetAge(name)
-
-	if err != nil {
-		h.l.Debug("API fail:", err)
-	} else {
-		data.Age = age
-	}
-
-	// Request Gender
-	gender, err := h.t.GetGender(name)
-
-	if err != nil {
-		h.l.Debug("API fail:", err)
-	} else {
-		data.Gender = gender
-	}
-
-	// Request Nationality
-	nationality, err := h.t.GetNationality(name)
-
-	if err != nil {
-		h.l.Debug("API fail:", err)
-	} else {
-		data.Nationality = nationality
-	}
-
-	return data
 }
 
 func (h *handler) update(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	// Decode JSON
 	var updates entity.Person
 	err := render.DecodeJSON(r.Body, &updates)
 	if err != nil {
@@ -156,9 +112,6 @@ func (h *handler) update(w http.ResponseWriter, r *http.Request) {
 
 	h.l.Info("request body decoded to entity.Person successfully", slog.Any("request", updates))
 
-	// Validate data
-
-	// Update data in db
 	res, err := h.t.Update(ctx, updates)
 
 	if err != nil {
@@ -172,29 +125,38 @@ func (h *handler) update(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r,
 		Response{
 			Status: StatusOk,
-			People: res,
+			Person: &res,
 		})
 }
 
 func (h *handler) delete(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	// Decode JSON
-	var id entity.Id
-	err := render.DecodeJSON(r.Body, &id)
-	if err != nil {
-		h.l.Debug("Failed to decode request body to entity.Id", h.l.Err(err))
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 
-		render.JSON(w, r, Error("failed to decode request body to entity.Id"))
+	if err != nil {
+
+		h.l.Debug("id parameter in URL is not integer or empty", h.l.Err(err))
+
+		render.JSON(w, r, Error("Unable to retrieve id from URL"))
 
 		return
 	}
 
-	h.l.Info("request body decoded to entity.Id successfully", slog.Any("request", id))
+	h.l.Info("request body decoded to int successfully", slog.Any("request", id))
 
-	// Validate data
+	if id == 0 {
 
-	// Delete data from db
+		h.l.Info("No data available for id = 0")
+
+		render.JSON(w, r,
+			Response{
+				Status: "Wrong id. Id should be > 0",
+			})
+
+		return
+	}
+
 	res, err := h.t.Delete(ctx, id)
 
 	if err != nil {
@@ -208,6 +170,6 @@ func (h *handler) delete(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r,
 		Response{
 			Status: StatusOk,
-			People: res,
+			Person: &res,
 		})
 }

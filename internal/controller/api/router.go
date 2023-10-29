@@ -4,12 +4,10 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
-	"people-finder/internal/usecase"
-	"people-finder/pkg/logger"
-
 	"people-finder/internal/controller/middleware/filter"
 	"people-finder/internal/controller/middleware/pagination"
-	"people-finder/internal/controller/middleware/sort"
+	"people-finder/internal/usecase"
+	"people-finder/pkg/logger"
 )
 
 func NewRouter(router *chi.Mux, l logger.Interface, t usecase.Person) {
@@ -25,7 +23,7 @@ func NewRouter(router *chi.Mux, l logger.Interface, t usecase.Person) {
 	router.Route("/person", func(r chi.Router) {
 
 		// Handler #1
-		r.Get("/{id}", person.find)
+		r.Get("/find/{id}", person.find)
 
 		// Handler #2
 		r.Post("/save", person.save)
@@ -34,7 +32,7 @@ func NewRouter(router *chi.Mux, l logger.Interface, t usecase.Person) {
 		r.Put("/update", person.update)
 
 		// Handler #4
-		r.Delete("/delete", person.delete)
+		r.Delete("/delete/{id}", person.delete)
 	})
 
 	router.Route("/people", func(r chi.Router) {
@@ -43,7 +41,6 @@ func NewRouter(router *chi.Mux, l logger.Interface, t usecase.Person) {
 
 			// Middleware
 			r.Use(filter.Middleware)
-			r.Use(sort.Middleware)
 
 			// Handler #5
 			r.Get("/", people.list)

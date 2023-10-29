@@ -1,17 +1,8 @@
 package entity
 
-// DELETE по id
-// GET по id или по Options
-// PUT (это update) данных по Person - только по id с указанием новых данных в Data
-// POST по данным в Data
-
 type Person struct {
-	Id
+	Id *int `db:"id" json:"id,omitempty"`
 	Data
-}
-
-type Id struct {
-	Id int `db:"id" json:"id"`
 }
 
 type Data struct {

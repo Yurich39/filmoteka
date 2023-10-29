@@ -5,6 +5,7 @@ import "people-finder/internal/entity"
 type Response struct {
 	Status       string          `json:"status,omitempty"`
 	Error        string          `json:"error,omitempty"`
+	Person       *entity.Person  `json:"person,omitempty"`
 	People       []entity.Person `json:"people,omitempty"`
 	NextPersonID int             `json:"next_person_id,omitempty"`
 }

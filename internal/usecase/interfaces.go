@@ -1,31 +1,28 @@
-// Package usecase implements application business logic. Each logic group in own file.
 package usecase
 
 import (
 	"context"
 
 	"people-finder/internal/entity"
+
+	"golang.org/x/exp/slog"
 )
 
 type (
 	Person interface {
-		Save(ctx context.Context, person entity.Person) ([]entity.Person, error)
-		Update(ctx context.Context, updates entity.Person) ([]entity.Person, error)
-		Delete(ctx context.Context, id entity.Id) ([]entity.Person, error)
-		Find(ctx context.Context, id entity.Id) ([]entity.Person, error)
+		Save(ctx context.Context, data entity.Data) (entity.Person, error)
+		Update(ctx context.Context, updates entity.Person) (entity.Person, error)
+		Delete(ctx context.Context, id int) (entity.Person, error)
+		Find(ctx context.Context, id int) (entity.Person, error)
 		List(ctx context.Context) ([]entity.Person, error)
 		Next(ctx context.Context) ([]entity.Person, error)
-
-		GetAge(name string) (int, error)
-		GetGender(name string) (string, error)
-		GetNationality(name string) (string, error)
 	}
 
 	PersonRepo interface {
-		Save(ctx context.Context, person entity.Person) ([]entity.Person, error)
-		Update(ctx context.Context, updates entity.Person) ([]entity.Person, error)
-		Delete(ctx context.Context, id entity.Id) ([]entity.Person, error)
-		Find(ctx context.Context, id entity.Id) ([]entity.Person, error)
+		Save(ctx context.Context, data entity.Data) (entity.Person, error)
+		Update(ctx context.Context, updates entity.Person) (entity.Person, error)
+		Delete(ctx context.Context, id int) (entity.Person, error)
+		Find(ctx context.Context, id int) (entity.Person, error)
 		List(ctx context.Context) ([]entity.Person, error)
 		Next(ctx context.Context) ([]entity.Person, error)
 	}
@@ -34,5 +31,13 @@ type (
 		EnrichAge(name string) (int, error)
 		EnrichGender(name string) (string, error)
 		EnrichNationality(name string) (string, error)
+	}
+
+	Logger interface {
+		Debug(msg string, args ...any)
+		Info(msg string, args ...any)
+		Warn(msg string, args ...any)
+		Error(msg string, args ...any)
+		Err(err error) slog.Attr
 	}
 )

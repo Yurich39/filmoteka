@@ -19,13 +19,24 @@ func (h *handler) list(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id := res[len(res)-1].Id.Id
+	if len(res) == 0 {
+		h.l.Info("No data")
+
+		render.JSON(w, r, Response{
+			Status: StatusOk,
+			Error:  "No data",
+		})
+
+		return
+	}
+
+	id := res[len(res)-1].Id
 
 	render.JSON(w, r,
 		Response{
 			Status:       StatusOk,
 			People:       res,
-			NextPersonID: id + 1,
+			NextPersonID: *id + 1,
 		})
 }
 
@@ -44,13 +55,24 @@ func (h *handler) next(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id := res[len(res)-1].Id.Id
+	if len(res) == 0 {
+		h.l.Info("No data")
+
+		render.JSON(w, r, Response{
+			Status: StatusOk,
+			Error:  "No data",
+		})
+
+		return
+	}
+
+	id := res[len(res)-1].Id
 
 	render.JSON(w, r,
 		Response{
 			Status:       StatusOk,
 			People:       res,
-			NextPersonID: id + 1,
+			NextPersonID: *id + 1,
 		})
 
 }
