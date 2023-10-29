@@ -1,26 +1,15 @@
 package entity
 
 type Person struct {
-	ID          int    `json:"id"`
-	Name        string `json:"name"`
-	Surname     string `json:"surname"`
-	Patronymic  string `json:"patronymic"`
-	Age         int    `json:"age"`
-	Gender      string `json:"gender"`
-	Nationality string `json:"nationality"`
+	Id *int `db:"id" json:"id,omitempty"`
+	Data
 }
 
-type UpdateRequest struct {
-	Filters   map[string]interface{} `json:"filters,omitempty"`
-	NewFields map[string]interface{} `json:"new_fields,omitempty"`
-}
-
-type DelRequest struct {
-	Filters map[string]interface{} `json:"filters,omitempty"`
-}
-
-type Options struct {
-	Where   map[string][]string
-	OrderBy []string
-	Order   []string
+type Data struct {
+	Name        *string `db:"name" json:"name,omitempty"`
+	Surname     *string `db:"surname" json:"surname,omitempty"`
+	Patronymic  *string `db:"patronymic" json:"patronymic,omitempty"`
+	Age         *int    `db:"age" json:"age,omitempty"`
+	Gender      *string `db:"gender" json:"gender,omitempty"`
+	Nationality *string `db:"nationality" json:"nationality,omitempty"`
 }

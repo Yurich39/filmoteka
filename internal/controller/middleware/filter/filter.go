@@ -6,16 +6,10 @@ import (
 )
 
 const (
-	ASC                         = "ASC"
-	DESC                        = "DESC"
 	FilterOptionsContextKey Str = "filter_options"
 )
 
 type Str string
-
-type Options struct {
-	Where map[string][]string
-}
 
 // The following Middleware injects filtering options into request context
 func Middleware(next http.Handler) http.Handler {
@@ -28,7 +22,6 @@ func Middleware(next http.Handler) http.Handler {
 			if k != "sort_by" && k != "sort_order" && k != "next_person_id" {
 				fields[k] = v
 			}
-
 		}
 
 		// Если параметров для фильтрации нет
@@ -37,12 +30,8 @@ func Middleware(next http.Handler) http.Handler {
 			return
 		}
 
-		options := Options{
-			Where: fields,
-		}
-
 		// Наполним контекст запроса новой парой ключ/значение
-		ctx := context.WithValue(r.Context(), FilterOptionsContextKey, options)
+		ctx := context.WithValue(r.Context(), FilterOptionsContextKey, fields)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

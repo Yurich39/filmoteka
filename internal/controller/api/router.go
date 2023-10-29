@@ -4,12 +4,10 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
-	"people-finder/internal/usecase"
-	"people-finder/pkg/logger"
-
 	"people-finder/internal/controller/middleware/filter"
 	"people-finder/internal/controller/middleware/pagination"
-	"people-finder/internal/controller/middleware/sort"
+	"people-finder/internal/usecase"
+	"people-finder/pkg/logger"
 )
 
 func NewRouter(router *chi.Mux, l logger.Interface, t usecase.Person) {
@@ -19,31 +17,36 @@ func NewRouter(router *chi.Mux, l logger.Interface, t usecase.Person) {
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
 
-	handler := newHandler(t, l)
+	person := newHandler(t, l)
+	people := newHandler(t, l)
 
 	router.Route("/person", func(r chi.Router) {
 
 		// Handler #1
-		r.Post("/save", handler.save)
+		r.Get("/find/{id}", person.find)
 
 		// Handler #2
-		r.Put("/update", handler.update)
+		r.Post("/save", person.save)
 
 		// Handler #3
-		r.Delete("/delete", handler.delete)
+		r.Put("/update", person.update)
+
+		// Handler #4
+		r.Delete("/delete/{id}", person.delete)
 	})
 
 	router.Route("/people", func(r chi.Router) {
-		// Middleware
-		r.Use(filter.Middleware)
-		r.Use(sort.Middleware)
 
-		// Handler #4
-		r.With(pagination.Middleware).Get("/next", handler.listPeople)
+		r.Route("/list", func(r chi.Router) {
 
-		r.Route("/find", func(r chi.Router) {
+			// Middleware
+			r.Use(filter.Middleware)
+
 			// Handler #5
-			r.Get("/", handler.find)
+			r.Get("/", people.list)
+
+			// Handler #6
+			r.With(pagination.Middleware).Get("/next", people.next)
 		})
 	})
 }

@@ -1,4 +1,3 @@
-// Package app configures and runs application.
 package app
 
 import (
@@ -8,7 +7,7 @@ import (
 
 	"golang.org/x/exp/slog"
 
-	"people-finder/pkg/logger"
+	"github.com/go-chi/chi/v5"
 
 	"people-finder/config"
 	"people-finder/internal/controller/api"
@@ -16,9 +15,8 @@ import (
 	"people-finder/internal/usecase/repo"
 	"people-finder/internal/usecase/webapi"
 	"people-finder/pkg/httpserver"
+	"people-finder/pkg/logger"
 	"people-finder/pkg/postgres"
-
-	"github.com/go-chi/chi/v5"
 )
 
 // Run creates objects via constructors.
@@ -36,6 +34,7 @@ func Run(cfg *config.Config) {
 	UseCase := usecase.New(
 		repo.New(db),
 		webapi.New(),
+		l,
 	)
 
 	// HTTP Server
