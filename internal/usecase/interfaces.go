@@ -19,10 +19,10 @@ type (
 	}
 
 	PersonRepo interface {
-		Save(ctx context.Context, data entity.Data) (entity.Person, error)
+		Save(ctx context.Context, data entity.Data) (int, error)
 		Update(ctx context.Context, updates entity.Person) (entity.Person, error)
 		Delete(ctx context.Context, id int) (entity.Person, error)
-		Find(ctx context.Context, id int) (entity.Person, error)
+		Get(ctx context.Context, id int) (entity.Person, error)
 		List(ctx context.Context) ([]entity.Person, error)
 		Next(ctx context.Context) ([]entity.Person, error)
 	}
