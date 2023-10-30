@@ -8,7 +8,6 @@ import (
 
 	"people-finder/internal/controller/middleware/filter"
 	"people-finder/internal/controller/middleware/pagination"
-
 	"people-finder/internal/entity"
 
 	"github.com/Masterminds/squirrel"
@@ -27,7 +26,7 @@ func New(db *sql.DB) *PersonRepo {
 
 const QueryFind = `SELECT * FROM people WHERE id = $1`
 
-func (r *PersonRepo) Find(ctx context.Context, id int) (entity.Person, error) {
+func (r *PersonRepo) Get(ctx context.Context, id int) (entity.Person, error) {
 
 	var res entity.Person
 	err := r.db.GetContext(ctx, &res, QueryFind, id)
@@ -41,11 +40,11 @@ func (r *PersonRepo) Find(ctx context.Context, id int) (entity.Person, error) {
 
 const QuerySave = `INSERT INTO people(name, surname, patronymic, age, gender, nationality)
 					VALUES($1, $2, $3, $4, $5, $6)
-					RETURNING id, name, surname, patronymic, age, gender, nationality`
+					RETURNING id`
 
-func (r *PersonRepo) Save(ctx context.Context, data entity.Data) (entity.Person, error) {
+func (r *PersonRepo) Save(ctx context.Context, data entity.Data) (int, error) {
 
-	var res entity.Person
+	var res int
 
 	err := r.db.GetContext(ctx, &res, QuerySave,
 		data.Name,
@@ -57,7 +56,7 @@ func (r *PersonRepo) Save(ctx context.Context, data entity.Data) (entity.Person,
 	)
 
 	if err != nil {
-		return entity.Person{}, fmt.Errorf("%s: DB method 'Query' returned error: %w", op, err)
+		return 0, fmt.Errorf("%s: DB method 'Query' returned error: %w", op, err)
 	}
 
 	return res, nil
@@ -96,40 +95,6 @@ func (r *PersonRepo) Update(ctx context.Context, updates entity.Person) (entity.
 
 	if err != nil {
 		return entity.Person{}, fmt.Errorf("%s: DB method 'Query' returned error: %w", op, err)
-	}
-
-	return res, nil
-}
-
-func getMap(updates entity.Person) (map[string]interface{}, error) {
-	res := map[string]interface{}{}
-
-	if val := updates.Data.Name; val != nil {
-		res["name"] = *val
-	}
-
-	if val := updates.Data.Surname; val != nil {
-		res["surname"] = *val
-	}
-
-	if val := updates.Data.Patronymic; val != nil {
-		res["patronymic"] = *val
-	}
-
-	if val := updates.Data.Age; val != nil {
-		res["age"] = *val
-	}
-
-	if val := updates.Data.Gender; val != nil {
-		res["gender"] = *val
-	}
-
-	if val := updates.Data.Nationality; val != nil {
-		res["nationality"] = *val
-	}
-
-	if len(res) == 0 {
-		return res, fmt.Errorf("%s: Data for update operation were NOT specified", op)
 	}
 
 	return res, nil
@@ -255,6 +220,40 @@ func (r *PersonRepo) Next(ctx context.Context) ([]entity.Person, error) {
 
 	if err != nil {
 		return []entity.Person{}, fmt.Errorf("%s: DB method 'Query' returned error: %w", op, err)
+	}
+
+	return res, nil
+}
+
+func getMap(updates entity.Person) (map[string]interface{}, error) {
+	res := map[string]interface{}{}
+
+	if val := updates.Data.Name; val != nil {
+		res["name"] = *val
+	}
+
+	if val := updates.Data.Surname; val != nil {
+		res["surname"] = *val
+	}
+
+	if val := updates.Data.Patronymic; val != nil {
+		res["patronymic"] = *val
+	}
+
+	if val := updates.Data.Age; val != nil {
+		res["age"] = *val
+	}
+
+	if val := updates.Data.Gender; val != nil {
+		res["gender"] = *val
+	}
+
+	if val := updates.Data.Nationality; val != nil {
+		res["nationality"] = *val
+	}
+
+	if len(res) == 0 {
+		return res, fmt.Errorf("%s: Data for update operation were NOT specified", op)
 	}
 
 	return res, nil

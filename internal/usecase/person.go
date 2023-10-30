@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	"people-finder/internal/entity"
 )
@@ -24,7 +25,7 @@ func New(r PersonRepo, w EnrichWebAPI, l Logger) *PersonUseCase {
 }
 
 func (uc *PersonUseCase) Find(ctx context.Context, id int) (entity.Person, error) {
-	res, err := uc.repo.Find(ctx, id)
+	res, err := uc.repo.Get(ctx, id)
 	if err != nil {
 		return res, fmt.Errorf("%s: repo.Find returned error: %w", op, err)
 	}
@@ -36,44 +37,18 @@ func (uc *PersonUseCase) Save(ctx context.Context, data entity.Data) (entity.Per
 
 	uc.enrich(ctx, &data)
 
-	person, err := uc.repo.Save(ctx, data)
+	id, err := uc.repo.Save(ctx, data)
 
 	if err != nil {
-		return person, fmt.Errorf("%s: repo.Save returned error: %w", op, err)
+		return entity.Person{}, fmt.Errorf("%s: usecase.Save returned error: %w", op, err)
 	}
 
-	return person, nil
-}
-
-func (uc *PersonUseCase) enrich(ctx context.Context, data *entity.Data) {
-
-	// Request Age
-	age, err := uc.webAPI.EnrichAge(*data.Name)
-
-	if err != nil {
-		uc.log.Debug("API fail:", err)
-	} else {
-		data.Age = &age
+	res := entity.Person{
+		Id:   &id,
+		Data: data,
 	}
 
-	// Request Gender
-	gender, err := uc.webAPI.EnrichGender(*data.Name)
-
-	if err != nil {
-		uc.log.Debug("API fail:", err)
-	} else {
-		data.Gender = &gender
-	}
-
-	// Request Nationality
-	nationality, err := uc.webAPI.EnrichNationality(*data.Name)
-
-	if err != nil {
-		uc.log.Debug("API fail:", err)
-	} else {
-		data.Nationality = &nationality
-	}
-
+	return res, nil
 }
 
 func (uc *PersonUseCase) Update(ctx context.Context, updates entity.Person) (entity.Person, error) {
@@ -110,4 +85,51 @@ func (uc *PersonUseCase) Next(ctx context.Context) ([]entity.Person, error) {
 	}
 
 	return res, nil
+}
+
+func (uc *PersonUseCase) enrich(ctx context.Context, data *entity.Data) {
+
+	wg := new(sync.WaitGroup)
+	wg.Add(3)
+
+	// Request Age
+	go func() {
+		defer wg.Done()
+
+		age, err := uc.webAPI.EnrichAge(*data.Name)
+
+		if err != nil {
+			uc.log.Debug("API fail:", err)
+		} else {
+			data.Age = &age
+		}
+	}()
+
+	// Request Gender
+	go func() {
+		defer wg.Done()
+
+		gender, err := uc.webAPI.EnrichGender(*data.Name)
+
+		if err != nil {
+			uc.log.Debug("API fail:", err)
+		} else {
+			data.Gender = &gender
+		}
+	}()
+
+	// Request Nationality
+	go func() {
+		defer wg.Done()
+
+		nationality, err := uc.webAPI.EnrichNationality(*data.Name)
+
+		if err != nil {
+			uc.log.Debug("API fail:", err)
+		} else {
+			data.Nationality = &nationality
+		}
+	}()
+
+	wg.Wait()
 }
