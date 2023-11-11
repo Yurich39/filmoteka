@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
-	// "github.com/joho/godotenv"
 )
 
 type (
@@ -32,12 +31,6 @@ type (
 
 func NewConfig() (*Config, error) {
 	cfg := &Config{}
-
-	// err := godotenv.Load("/app/.env.example")
-
-	// if err != nil {
-	// 	return nil, fmt.Errorf("error loading .env file: %w", err)
-	// }
 
 	err := cleanenv.ReadConfig("./config/config.yml", cfg)
 	if err != nil {

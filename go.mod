@@ -8,7 +8,6 @@ require (
 	github.com/go-chi/render v1.0.3
 	github.com/golang-migrate/migrate/v4 v4.16.2
 	github.com/ilyakaznacheev/cleanenv v1.5.0
-	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
 	go.uber.org/mock v0.3.0
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d
@@ -16,6 +15,7 @@ require (
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	golang.org/x/net v0.16.0 // indirect
 )
