@@ -153,10 +153,8 @@ func (r *PersonRepo) List(ctx context.Context) ([]entity.Person, error) {
 		qb = qb.Where(strings.Join(stmt, " AND "))
 	}
 
-	// Решаем, использовать оператор ORDER BY или нет
-	if len(stmt) != 0 {
-		qb = qb.OrderBy("id ASC")
-	}
+	// Используем оператор ORDER BY
+	qb = qb.OrderBy("id ASC")
 
 	qb = qb.Limit(pageSize)
 
@@ -202,10 +200,8 @@ func (r *PersonRepo) Next(ctx context.Context) ([]entity.Person, error) {
 	personID := ctx.Value(pagination.NextPersonID).(int)
 	qb = qb.Where(fmt.Sprintf("id >= %d", personID))
 
-	// Решаем, использовать оператор ORDER BY или нет
-	if len(stmt) != 0 {
-		qb = qb.OrderBy("id ASC")
-	}
+	// Используем оператор ORDER BY
+	qb = qb.OrderBy("id ASC")
 
 	qb = qb.Limit(pageSize)
 

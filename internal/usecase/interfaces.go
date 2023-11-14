@@ -8,6 +8,8 @@ import (
 	"golang.org/x/exp/slog"
 )
 
+//go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=usecase_test
+
 type (
 	Person interface {
 		Save(ctx context.Context, data entity.Data) (entity.Person, error)

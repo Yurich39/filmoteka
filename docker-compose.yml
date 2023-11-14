@@ -1,4 +1,4 @@
-version: '3.9'
+version: '3.5'
 services:
 
   postgres:
@@ -10,8 +10,8 @@ services:
       POSTGRES_USER: 'user'
       POSTGRES_PASSWORD: 'pass'
       POSTGRES_DB: 'postgres'
-    ports:
-      - 5432:5432
+    networks:
+      - appnet
 
   app:
     build: .
@@ -20,9 +20,21 @@ services:
     environment:
       PG_URL: 'postgres://user:pass@postgres:5432/postgres?sslmode=disable'
     ports:
-      - 8080:8080
+      - 8080:80
     depends_on:
       - postgres
+    networks:
+      - internet
+      - appnet
 
 volumes:
   pg-data:
+
+
+networks:
+  internet:
+    name: internet
+    driver: bridge
+  appnet:
+    name: appnet
+    driver: bridge
