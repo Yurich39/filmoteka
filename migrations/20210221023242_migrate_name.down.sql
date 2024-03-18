@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS people;
+DROP TABLE IF EXISTS actors, movies, actors_movies;

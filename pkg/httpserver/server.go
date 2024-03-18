@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"people-finder/config"
+	"filmoteka/config"
 )
 
 type Server struct {

@@ -3,7 +3,7 @@ package postgres
 import (
 	"database/sql"
 	"fmt"
-	"people-finder/config"
+	"filmoteka/config"
 
 	_ "github.com/lib/pq"
 )

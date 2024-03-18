@@ -30,7 +30,7 @@ test: ### run test
 .PHONY: test
 
 docker-rm-volume: ### remove docker volume
-	docker volume rm people-finder_pg-data
+	docker volume rm filmoteka_pg-data
 .PHONY: docker-rm-volume
 
 linter-golangci: ### check by golangci linter

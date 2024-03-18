@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"people-finder/config"
-	"people-finder/internal/app"
+	"filmoteka/config"
+	"filmoteka/internal/app"
 )
 
 func main() {

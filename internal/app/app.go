@@ -9,14 +9,13 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"people-finder/config"
-	"people-finder/internal/controller/api"
-	"people-finder/internal/usecase"
-	"people-finder/internal/usecase/repo"
-	"people-finder/internal/usecase/webapi"
-	"people-finder/pkg/httpserver"
-	"people-finder/pkg/logger"
-	"people-finder/pkg/postgres"
+	"filmoteka/config"
+	"filmoteka/internal/controller/api"
+	"filmoteka/internal/usecase"
+	"filmoteka/internal/usecase/repo"
+	"filmoteka/pkg/httpserver"
+	"filmoteka/pkg/logger"
+	"filmoteka/pkg/postgres"
 )
 
 // Run creates objects via constructors.
@@ -29,17 +28,29 @@ func Run(cfg *config.Config) {
 		l.Debug("failed to init storage", l.Err(err))
 		os.Exit(1)
 	}
+	defer db.Close()
 
-	// Use case 'person'
-	UseCase := usecase.New(
-		repo.New(db),
-		webapi.New(),
+	// Creating usecase for actors
+	actorsUseCase := usecase.NewActors(
+		repo.NewActorsRepo(db),
+		l,
+	)
+
+	// Creating usecase for movies
+	moviesUseCase := usecase.NewMovies(
+		repo.NewMoviesRepo(db),
+		l,
+	)
+
+	// Creating usecase for many-to-many relationship between actors and films
+	actorsMoviesUseCase := usecase.NewActorsMovies(
+		repo.NewActorsMoviesRepo(db),
 		l,
 	)
 
 	// HTTP Server
 	r := chi.NewRouter()
-	api.NewRouter(r, l, UseCase)
+	api.NewRouter(cfg, r, l, actorsUseCase, moviesUseCase, actorsMoviesUseCase)
 
 	l.Info("starting server", slog.String("address", cfg.Address))
 

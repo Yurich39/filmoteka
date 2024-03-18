@@ -22,6 +22,8 @@ type (
 		Address     string        `env-required:"true" yaml:"address" env:"HTTP_ADDRESS"`
 		Timeout     time.Duration `env-required:"true" yaml:"timeout" env:"HTTP_TIMEOUT"`
 		IdleTimeout time.Duration `env-required:"true" yaml:"idle_timeout" env:"HTTP_IDLE_TIMEOUT"`
+		User string `env-required:"true" yaml:"user" env:"HTTP_USER"`
+		Pass string `env-required:"true" yaml:"pass" env:"HTTP_PASS"`
 	}
 
 	StorageConfig struct {

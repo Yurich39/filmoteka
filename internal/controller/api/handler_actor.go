@@ -1,28 +1,31 @@
 package api
 
 import (
+	"database/sql"
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
+	"github.com/lib/pq"
 	"golang.org/x/exp/slog"
 
-	"people-finder/internal/entity"
-	"people-finder/internal/usecase"
-	"people-finder/pkg/logger"
+	"filmoteka/internal/entity"
+	"filmoteka/internal/usecase"
+	"filmoteka/pkg/logger"
 )
 
-type handler struct {
-	t usecase.Person
+type actorHandler struct {
+	t usecase.Actor
 	l logger.Interface
 }
 
-func newHandler(t usecase.Person, l logger.Interface) *handler {
-	return &handler{t: t, l: l}
+func newActorHandler(t usecase.Actor, l logger.Interface) *actorHandler {
+	return &actorHandler{t: t, l: l}
 }
 
-func (h *handler) find(w http.ResponseWriter, r *http.Request) {
+func (h *actorHandler) find(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
@@ -32,7 +35,7 @@ func (h *handler) find(w http.ResponseWriter, r *http.Request) {
 		h.l.Info("No data available for id = 0")
 
 		render.JSON(w, r,
-			Response{
+			ActorResponse{
 				Status: "Wrong id. Id should be > 0",
 			})
 
@@ -53,83 +56,93 @@ func (h *handler) find(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.l.Debug("Failed to get data from DB", h.l.Err(err))
 
-		render.JSON(w, r, Error("Unable to get data from DB"))
+		render.JSON(w, r, Error(fmt.Sprintf("Database has NO actor with id = %d", id)))
 
 		return
 	}
 
 	render.JSON(w, r,
-		Response{
+		ActorResponse{
 			Status: StatusOk,
-			Person: &res,
+			Actor:  &res,
 		})
 }
 
-func (h *handler) save(w http.ResponseWriter, r *http.Request) {
+func (h *actorHandler) save(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	var data entity.Data
+	var data entity.ActorData
 	err := render.DecodeJSON(r.Body, &data)
 	if err != nil {
-		h.l.Debug("Failed to decode request body to entity.Data", h.l.Err(err))
+		h.l.Debug("Failed to decode request body to entity.ActorData", h.l.Err(err))
 
-		render.JSON(w, r, Error("failed to decode request body to entity.Data"))
+		render.JSON(w, r, Error("failed to decode request body to entity.ActorData"))
 
 		return
 	}
 
-	h.l.Info("request body decoded to entity.Data successfully", slog.Any("request", data))
+	h.l.Info("request body decoded to entity.ActorData successfully", slog.Any("request", data))
 
 	res, err := h.t.Save(ctx, data)
 
 	if err != nil {
 		h.l.Debug("Failed to save data in DB", h.l.Err(err))
 
-		render.JSON(w, r, Error("Unable to save person data in DB"))
-
-		return
+		if err == sql.ErrNoRows {
+			render.JSON(w, r, Error("actor already exists"))
+			return
+		} else {
+			switch err := err.(type) {
+			case *pq.Error:
+				render.JSON(w, r, Error("provided data is invalid"))
+				return
+			default:
+				render.JSON(w, r, err.Error())
+				return
+			}
+		}
 	}
 
 	render.JSON(w, r,
-		Response{
+		ActorResponse{
 			Status: StatusOk,
-			Person: &res,
+			Actor:  &res,
 		})
 }
 
-func (h *handler) update(w http.ResponseWriter, r *http.Request) {
+func (h *actorHandler) update(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	var updates entity.Person
+	var updates entity.Actor
 	err := render.DecodeJSON(r.Body, &updates)
 	if err != nil {
-		h.l.Debug("Failed to decode request body to entity.Person", h.l.Err(err))
+		h.l.Debug("Failed to decode request body to entity.Actor", h.l.Err(err))
 
-		render.JSON(w, r, Error("failed to decode request body to entity.Person"))
+		render.JSON(w, r, Error("failed to decode request body to entity.Actor"))
 
 		return
 	}
 
-	h.l.Info("request body decoded to entity.Person successfully", slog.Any("request", updates))
+	h.l.Info("request body decoded to entity.Actor successfully", slog.Any("request", updates))
 
 	res, err := h.t.Update(ctx, updates)
 
 	if err != nil {
 		h.l.Debug("Failed to update data in DB", h.l.Err(err))
 
-		render.JSON(w, r, Error("Unable to update person data in DB"))
+		render.JSON(w, r, Error("Unable to update actor data in DB"))
 
 		return
 	}
 
 	render.JSON(w, r,
-		Response{
+		ActorResponse{
 			Status: StatusOk,
-			Person: &res,
+			Actor:  &res,
 		})
 }
 
-func (h *handler) delete(w http.ResponseWriter, r *http.Request) {
+func (h *actorHandler) delete(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
@@ -150,7 +163,7 @@ func (h *handler) delete(w http.ResponseWriter, r *http.Request) {
 		h.l.Info("No data available for id = 0")
 
 		render.JSON(w, r,
-			Response{
+			ActorResponse{
 				Status: "Wrong id. Id should be > 0",
 			})
 
@@ -168,8 +181,8 @@ func (h *handler) delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	render.JSON(w, r,
-		Response{
+		ActorResponse{
 			Status: StatusOk,
-			Person: &res,
+			Actor:  &res,
 		})
 }

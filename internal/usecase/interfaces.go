@@ -3,7 +3,7 @@ package usecase
 import (
 	"context"
 
-	"people-finder/internal/entity"
+	"filmoteka/internal/entity"
 
 	"golang.org/x/exp/slog"
 )
@@ -11,28 +11,60 @@ import (
 //go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=usecase_test
 
 type (
-	Person interface {
-		Save(ctx context.Context, data entity.Data) (entity.Person, error)
-		Update(ctx context.Context, updates entity.Person) (entity.Person, error)
-		Delete(ctx context.Context, id int) (entity.Person, error)
-		Find(ctx context.Context, id int) (entity.Person, error)
-		List(ctx context.Context) ([]entity.Person, error)
-		Next(ctx context.Context) ([]entity.Person, error)
+	Actor interface {
+		Save(ctx context.Context, data entity.ActorData) (entity.Actor, error)
+		Update(ctx context.Context, updates entity.Actor) (entity.Actor, error)
+		Delete(ctx context.Context, id int) (entity.Actor, error)
+		Find(ctx context.Context, id int) (entity.Actor, error)
+		List(ctx context.Context) ([]entity.Actor, error)
+		Next(ctx context.Context) ([]entity.Actor, error)
 	}
 
-	PersonRepo interface {
-		Save(ctx context.Context, data entity.Data) (int, error)
-		Update(ctx context.Context, updates entity.Person) (entity.Person, error)
-		Delete(ctx context.Context, id int) (entity.Person, error)
-		Get(ctx context.Context, id int) (entity.Person, error)
-		List(ctx context.Context) ([]entity.Person, error)
-		Next(ctx context.Context) ([]entity.Person, error)
+	Movie interface {
+		Save(ctx context.Context, data entity.MovieData) (entity.Movie, error)
+		Update(ctx context.Context, updates entity.Movie) (entity.Movie, error)
+		Delete(ctx context.Context, id int) (entity.Movie, error)
+		Find(ctx context.Context, id int) (entity.Movie, error)
+		FindMovie(ctx context.Context) ([]entity.Movie, error)
+		List(ctx context.Context) ([]entity.Movie, error)
+		Next(ctx context.Context) ([]entity.Movie, error)
 	}
 
-	EnrichWebAPI interface {
-		EnrichAge(name string) (int, error)
-		EnrichGender(name string) (string, error)
-		EnrichNationality(name string) (string, error)
+	ActorMovie interface {
+		Save(ctx context.Context, data entity.ActorMovie) error
+		// Update(ctx context.Context, updates entity.ActorMovie) (entity.ActorMovie, error)
+		// Delete(ctx context.Context, id int) (entity.ActorMovie, error)
+		// Find(ctx context.Context, id int) (entity.ActorMovie, error)
+		List(ctx context.Context) ([]entity.ActorMovieData, error)
+		// Next(ctx context.Context) ([]entity.ActorMovie, error)
+	}
+
+	ActorsRepo interface {
+		Save(ctx context.Context, data entity.ActorData) (int, error)
+		Update(ctx context.Context, updates entity.Actor) (entity.Actor, error)
+		Delete(ctx context.Context, id int) (entity.Actor, error)
+		Get(ctx context.Context, id int) (entity.Actor, error)
+		List(ctx context.Context) ([]entity.Actor, error)
+		Next(ctx context.Context) ([]entity.Actor, error)
+	}
+
+	MoviesRepo interface {
+		Save(ctx context.Context, data entity.MovieData) (int, error)
+		Update(ctx context.Context, updates entity.Movie) (entity.Movie, error)
+		Delete(ctx context.Context, id int) (entity.Movie, error)
+		Get(ctx context.Context, id int) (entity.Movie, error)
+		GetMovie(ctx context.Context) ([]entity.Movie, error)
+		List(ctx context.Context) ([]entity.Movie, error)
+		Next(ctx context.Context) ([]entity.Movie, error)
+	}
+
+	ActorsMoviesRepo interface {
+		Save(ctx context.Context, data entity.ActorMovie) error
+		// Update(ctx context.Context, updates entity.ActorMovie) (entity.ActorMovie, error)
+		// Delete(ctx context.Context, id int) (entity.ActorMovie, error)
+		// Get(ctx context.Context, id int) (entity.ActorMovie, error)
+		List(ctx context.Context) ([]entity.ActorMovieData, error)
+		// Next(ctx context.Context) ([]entity.ActorMovie, error)
 	}
 
 	Logger interface {
